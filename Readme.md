@@ -1,21 +1,26 @@
 # Embed Bullet Plugin
 
-This plugin allows you to embed a selected bullet point (with a block ID) from the active note into the note to the right, under a collapsible heading named after the source note. It also updates the bullet symbol from `- [/]` to `- [n]` in the source note.
+This plugin provides three helper commands for working with literature notes in Obsidian.
+
+## Commands
+
+- "Create point note from block"
+    - Open a literature note, click on one highlight (or another line containing a block-ID in the end) and then use this command to create a new point note
+	- while creating the point note you have the option to take the topics of the literature note with you
+
+- "Embed block to right-hand note"
+    - this is used to add additional highlights to an existing point note
+    - open your literature note in the left pane and the existing point note in the right pane, then in the literature note click on the highlight you want to include in the point note, use this command to have it inserted there
+
+- "Manage Topics"
+	- Description: Opens a multi-select modal of available Topic notes (files whose basename ends with ` - Topic`) and lets you add or remove topic links in the active note. It pre-selects topics already present in the note.
+	- Effect: Adds links to the chosen topic notes after `Topics*:: ` in the active note
 
 ## Features
 
-- Embed selected bullet (with block ID) into the right-hand note.
-- Group embeds under `## [[sourceNoteName]]` heading.
-- Automatically create the heading if it doesn't exist.
-- Update the original bullet from `- [/]` to `- [n]`.
-
-## Usage
-
-1. Open two notes side by side in Obsidian.
-2. Select a bullet point in the left note that ends with a block ID (e.g., `^abc123`).
-3. Run the command: **"Embed selected bullet to right pane"** (via Command Palette or hotkey).
-4. The embed will be inserted under `## [[sourceNoteName]]` in the right note.
-5. The bullet in the source note will be updated from `- [/]` to `- [n]`.
+- Create point notes from a highlight in a literature note seamlessly
+- add highlights from a literature note to an existing point note
+- Manage Topics via a multi-select UI for quick add/remove of topic links.
 
 ## Installation (Local Use)
 
