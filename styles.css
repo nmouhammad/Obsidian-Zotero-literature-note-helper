@@ -1,0 +1,36 @@
+.topic-chip-selector .chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.topic-chip-selector .chip {
+  background-color: var(--interactive-accent);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.topic-chip-selector .remove-chip {
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.topic-chip-selector .suggestion-box {
+  margin-top: 8px;
+}
+
+.topic-chip-selector .suggestion-item {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.topic-chip-selector .suggestion-item:hover {
+  background-color: var(--background-modifier-hover);
+}
