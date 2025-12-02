@@ -7,7 +7,15 @@ export class TopicChipSelector {
   selectedTopics: Set<string> = new Set();
 
   constructor(parent: HTMLElement, allTopics: string[]) {
-    this.allTopics = allTopics;
+    // Sort topics A -> Z, case-insensitive, ignoring the trailing " - Topic" suffix
+    this.allTopics = allTopics.slice().sort((a, b) => {
+      const key = (s: string) => s.replace(/ - Topic$/i, "").toLowerCase();
+      const ka = key(a);
+      const kb = key(b);
+      if (ka < kb) return -1;
+      if (ka > kb) return 1;
+      return 0;
+    });
     this.container = parent.createDiv({ cls: "topic-chip-selector" });
 
     this.chipContainer = this.container.createDiv({ cls: "chip-container" });
@@ -22,27 +30,47 @@ export class TopicChipSelector {
   }
 
   setupInput() {
-    this.input.oninput = () => {
-      const query = this.input.value.toLowerCase();
-      const suggestions = this.allTopics.filter(t =>
-        t.toLowerCase().includes(query) && !this.selectedTopics.has(t)
-      );
+    const renderSuggestionsForQuery = (query: string) => {
+      const q = query.toLowerCase();
+      const suggestions = this.allTopics
+        .filter(t => t.toLowerCase().includes(q) && !this.selectedTopics.has(t))
+        .slice()
+        .sort((a, b) => {
+          const key = (s: string) => s.replace(/ - Topic$/i, "").toLowerCase();
+          const ka = key(a);
+          const kb = key(b);
+          if (ka < kb) return -1;
+          if (ka > kb) return 1;
+          return 0;
+        });
 
       this.suggestionBox.empty();
-      
-    suggestions.forEach(s => {
-      const displayText = s.replace(/ - Topic$/, "");
-      const item = this.suggestionBox.createDiv({ cls: "suggestion-item", text: displayText });
-      item.onclick = () => {
-        this.selectedTopics.add(s);
-        this.input.value = "";
-        this.suggestionBox.empty();
-        this.renderChips();
-      };
-    });
+
+      suggestions.forEach(s => {
+        const displayText = s.replace(/ - Topic$/, "");
+        const item = this.suggestionBox.createDiv({ cls: "suggestion-item", text: displayText });
+        item.onclick = () => {
+          this.selectedTopics.add(s);
+          this.input.value = "";
+          this.suggestionBox.empty();
+          this.renderChips();
+        };
+      });
+
       if (suggestions.length === 0) {
         this.suggestionBox.createDiv({ cls: "no-suggestions", text: "No suggestions found" });
       }
+    };
+
+    // Show suggestions when typing
+    this.input.oninput = () => {
+      renderSuggestionsForQuery(this.input.value);
+    };
+
+    // Also show all suggestions (except already selected) when field is focused,
+    // even if the input is empty.
+    this.input.onfocus = () => {
+      renderSuggestionsForQuery(this.input.value);
     };
   }
 

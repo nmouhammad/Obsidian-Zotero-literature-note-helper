@@ -23,6 +23,13 @@
 
 .topic-chip-selector .suggestion-box {
   margin-top: 8px;
+  /* Keep the suggestion box from growing too tall; allow internal scrolling */
+  max-height: 40vh;
+  overflow: auto;
+  padding-right: 4px; /* prevent scrollbar from overlapping content */
+  /* Force normal top-to-bottom stacking even if external styles set reverse */
+  display: flex;
+  flex-direction: column;
 }
 
 .topic-chip-selector .suggestion-item {
