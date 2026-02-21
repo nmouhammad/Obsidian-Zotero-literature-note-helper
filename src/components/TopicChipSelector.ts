@@ -30,13 +30,14 @@ export class TopicChipSelector {
   }
 
   setupInput() {
-    const renderSuggestionsForQuery = (query: string) => {
+    const renderSuggestionsForQuery = (query = "") => {
       const q = query.toLowerCase();
+      // Show all topics matching query, regardless of selection
       const suggestions = this.allTopics
-        .filter(t => t.toLowerCase().includes(q) && !this.selectedTopics.has(t))
+        .filter(t => t.toLowerCase().includes(q))
         .slice()
         .sort((a, b) => {
-          const key = (s: string) => s.replace(/ - Topic$/i, "").toLowerCase();
+          const key = (s) => s.replace(/ - Topic$/i, "").toLowerCase();
           const ka = key(a);
           const kb = key(b);
           if (ka < kb) return -1;
@@ -46,20 +47,41 @@ export class TopicChipSelector {
 
       this.suggestionBox.empty();
 
-      suggestions.forEach(s => {
-        const displayText = s.replace(/ - Topic$/, "");
-        const item = this.suggestionBox.createDiv({ cls: "suggestion-item", text: displayText });
-        item.onclick = () => {
-          this.selectedTopics.add(s);
-          this.input.value = "";
-          this.suggestionBox.empty();
-          this.renderChips();
-        };
-      });
-
       if (suggestions.length === 0) {
         this.suggestionBox.createDiv({ cls: "no-suggestions", text: "No suggestions found" });
+        return;
       }
+
+      suggestions.forEach(s => {
+        const displayText = s.replace(/ - Topic$/, "");
+        const isSelected = this.selectedTopics.has(s);
+        const item = this.suggestionBox.createDiv({ cls: "suggestion-item" });
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.cursor = "pointer";
+        // Text
+        const label = item.createDiv({ text: displayText, cls: "suggestion-label" });
+        label.style.flex = "1";
+        // Tick or empty
+        const tick = item.createDiv({ cls: "suggestion-tick" });
+        tick.style.marginLeft = "0.5em";
+        tick.textContent = isSelected ? "✔️" : "";
+        // Toggle selection on click
+        item.onclick = () => {
+          if (isSelected) {
+            this.selectedTopics.delete(s);
+          } else {
+            this.selectedTopics.add(s);
+          }
+          // Do not clear input or hide suggestions
+          this.renderChips();
+          renderSuggestionsForQuery(this.input.value);
+        };
+        // Optionally, highlight selected
+        if (isSelected) {
+          item.classList.add("selected-suggestion");
+        }
+      });
     };
 
     // Show suggestions when typing
@@ -67,11 +89,13 @@ export class TopicChipSelector {
       renderSuggestionsForQuery(this.input.value);
     };
 
-    // Also show all suggestions (except already selected) when field is focused,
-    // even if the input is empty.
+    // Show all suggestions (matching input) when focused
     this.input.onfocus = () => {
       renderSuggestionsForQuery(this.input.value);
     };
+
+    // Always show suggestions initially
+    renderSuggestionsForQuery("");
   }
 
   renderChips() {
