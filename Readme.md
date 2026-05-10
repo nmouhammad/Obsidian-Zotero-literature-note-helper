@@ -30,4 +30,3 @@ This plugin provides three helper commands for working with literature notes in 
 4. Click **"Reload plugins"**.
 5. Enable **"Embed Bullet Plugin"**.
 
-This plugin is intended for local use and does not require publishing.
