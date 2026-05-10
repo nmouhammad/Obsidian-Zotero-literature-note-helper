@@ -1,4 +1,4 @@
-# Embed Bullet Plugin
+# Academic note-taking helper
 
 This plugin provides three helper commands for working with literature notes in Obsidian.
 
