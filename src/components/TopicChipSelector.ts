@@ -118,6 +118,12 @@ export class TopicChipSelector {
       removeBtn.onclick = () => {
         this.selectedTopics.delete(topic);
         this.renderChips();
+        // Also update the suggestion list to untick the topic
+        if (this.input) {
+          // Re-render suggestions for current input value
+          const event = new Event('input');
+          this.input.dispatchEvent(event);
+        }
       };
     });
   }
