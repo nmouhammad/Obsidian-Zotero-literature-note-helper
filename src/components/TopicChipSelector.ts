@@ -5,6 +5,8 @@ export class TopicChipSelector {
   chipContainer: HTMLElement;
   allTopics: string[];
   selectedTopics: Set<string> = new Set();
+  // Map from normalized display name to canonical topic string (with suffix)
+  topicDisplayMap: Map<string, string>;
 
   constructor(parent: HTMLElement, allTopics: string[]) {
     // Sort topics A -> Z, case-insensitive, ignoring the trailing " - Topic" suffix
@@ -15,6 +17,12 @@ export class TopicChipSelector {
       if (ka < kb) return -1;
       if (ka > kb) return 1;
       return 0;
+    });
+    // Build a map from normalized display name to canonical topic string
+    this.topicDisplayMap = new Map();
+    this.allTopics.forEach(t => {
+      const display = t.replace(/ - Topic$/i, "").toLowerCase();
+      this.topicDisplayMap.set(display, t);
     });
     this.container = parent.createDiv({ cls: "topic-chip-selector" });
 
@@ -36,8 +44,8 @@ export class TopicChipSelector {
       const suggestions = this.allTopics
         .filter(t => t.toLowerCase().includes(q))
         .slice()
-        .sort((a, b) => {
-          const key = (s) => s.replace(/ - Topic$/i, "").toLowerCase();
+        .sort((a: string, b: string) => {
+          const key = (s: string) => s.replace(/ - Topic$/i, "").toLowerCase();
           const ka = key(a);
           const kb = key(b);
           if (ka < kb) return -1;
@@ -110,6 +118,12 @@ export class TopicChipSelector {
       removeBtn.onclick = () => {
         this.selectedTopics.delete(topic);
         this.renderChips();
+        // Also update the suggestion list to untick the topic
+        if (this.input) {
+          // Re-render suggestions for current input value
+          const event = new Event('input');
+          this.input.dispatchEvent(event);
+        }
       };
     });
   }
@@ -120,7 +134,18 @@ export class TopicChipSelector {
   }
 
   setInitialTopics(topics: string[]) {
-    topics.forEach(t => this.selectedTopics.add(t));
+    // Normalize initial topics to canonical topic strings from allTopics
+    topics.forEach(t => {
+      // Try to match by display name (case-insensitive, ignoring suffix)
+      const display = t.replace(/ - Topic$/i, "").toLowerCase();
+      const canonical = this.topicDisplayMap.get(display);
+      if (canonical) {
+        this.selectedTopics.add(canonical);
+      } else {
+        // fallback: add as-is
+        this.selectedTopics.add(t);
+      }
+    });
     this.renderChips();
   }
 }

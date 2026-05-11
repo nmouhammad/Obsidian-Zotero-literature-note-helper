@@ -1,7 +1,8 @@
 import { MarkdownView, Notice, Plugin } from "obsidian";
 import { InputPromptModal } from "../modals/InputPromptModal";
 import { TopicSelectorModal } from "../modals/TopicSelectorModal";
-import { extractTopicsFromContent, getFullTopicName } from "../utils";
+import { getFullTopicName } from "../utils";
+import { readFrontmatter, writeFrontmatter, getDisplayTopicsFromFrontmatter } from "../utils/frontmatter";
 
 // === Command: Create point note & embed the bullet point the cursor is currently at & offer to copy topics ===
 
@@ -37,8 +38,9 @@ export function registerPointNoteFromBlock(plugin: Plugin) {
             const heading = `### ${sourceFile.basename} [[${sourceFile.basename}|📑]]`;
             const newFolder = (plugin as any).settings?.newFolder || "Point notes";
 
-            const sourceContent = await plugin.app.vault.read(sourceFile);
-            const topics = extractTopicsFromContent(sourceContent);
+            // Read topics from YAML frontmatter property 'Topics'
+            const frontmatter = await readFrontmatter(plugin.app, sourceFile);
+            const topics = getDisplayTopicsFromFrontmatter(frontmatter);
 
             new InputPromptModal(plugin.app, async (newFileName: string) => {
             const allTopics = plugin.app.vault.getMarkdownFiles()
@@ -95,21 +97,32 @@ export function registerPointNoteFromBlock(plugin: Plugin) {
                   : `---\ntype: point-note\n---\n\n`;
     
     
-    
-                const newFileContent = `${yaml}${heading}\n${embedLink}\n\n## Connected notes\n\n### Backlinking Notes not mentioned above\n\n\`\`\`dataviewjs\nconst { DataviewUtilsUnmentionedInlinks } = customJS;\nawait DataviewUtilsUnmentionedInlinks.prettyUnmentionedInlinks(dv);\n\`\`\``;
-    
+                                // Build YAML frontmatter object
+                                const newFrontmatter: any = {
+                                  type: "point-note"
+                                };
+                                if (selectedTopics.length) {
+                                  newFrontmatter.Topics = selectedTopics.map(getFullTopicName);
+                                }
+                                // Compose note content
+                                const yamlString = `---\n${require("js-yaml").dump(newFrontmatter, { lineWidth: 1000 }).trim()}\n---\n\n`;
                 try {
-                  const newFile = await plugin.app.vault.create(newFilePath, newFileContent);
+                                const newFileContent = `${yamlString}${heading}\n${embedLink}\n\n## Connected notes\n\n### Backlinking Notes not mentioned above\n\n\`\`\`dataviewjs\nconst { DataviewUtilsUnmentionedInlinks } = customJS;\nawait DataviewUtilsUnmentionedInlinks.prettyUnmentionedInlinks(dv);\n\`\`\``;
+                  await plugin.app.vault.create(newFilePath, newFileContent);
                   const newLeaf = plugin.app.workspace.getLeaf("split");
-                  await newLeaf.openFile(newFile);
-    
+                  const newFileHandle = plugin.app.vault.getAbstractFileByPath(newFilePath);
+                  if (newFileHandle) {
+                    await newLeaf.openFile(newFileHandle);
+                  }
+
+                  const sourceContent = await plugin.app.vault.read(sourceFile);
                   const sourceLines = sourceContent.split("\n");
-                  const lineIndex = sourceLines.findIndex(line => line.includes(`^${blockId}`));
+                  const lineIndex = sourceLines.findIndex((line: string) => line.includes(`^${blockId}`));
                   if (lineIndex !== -1) {
                     sourceLines[lineIndex] = sourceLines[lineIndex].replace("- [/]", "- [n]");
                     await plugin.app.vault.modify(sourceFile, sourceLines.join("\n"));
                   }
-    
+
                   new Notice(`✅ Created point note at ${newFilePath} with block reference.`);
                 } catch (e) {
                   if (!warnedMissingFolder) {
