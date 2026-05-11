@@ -92,22 +92,26 @@ export function registerPointNoteFromBlock(plugin: Plugin) {
                   warnedMissingFolder = true;
                 }
     
-                const yaml = selectedTopics.length
-                  ? `---\ntype: point-note\nTopics:\n${selectedTopics.map(t => `  - "${getFullTopicName(t)}"`).join("\n")}\n---\n\n`
-                  : `---\ntype: point-note\n---\n\n`;
+                // const yaml = selectedTopics.length
+                //   ? `---\ntype: point-note\nTopics:\n${selectedTopics.map(t => `  - "${getFullTopicName(t)}"`).join("\n")}\n---\n\n`
+                //   : `---\ntype: point-note\n---\n\n`;
     
     
-                                // Build YAML frontmatter object
-                                const newFrontmatter: any = {
-                                  type: "point-note"
-                                };
-                                if (selectedTopics.length) {
-                                  newFrontmatter.Topics = selectedTopics.map(getFullTopicName);
-                                }
-                                // Compose note content
-                                const yamlString = `---\n${require("js-yaml").dump(newFrontmatter, { lineWidth: 1000 }).trim()}\n---\n\n`;
+                // Build YAML frontmatter object
+                const newFrontmatter: any = {
+                  type: "point-note"
+                };
+                if (selectedTopics.length) {
+                  newFrontmatter.Topics = selectedTopics.map(getFullTopicName);
+                }
+                // Add creation date for better sorting and metadata (in format YYYY-MM-DD_HH-mm)
+                const now = new Date();
+                const pad = (n: number) => n.toString().padStart(2, '0');
+                newFrontmatter.CreationDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+                // Compose note content
+                const yamlString = `---\n${require("js-yaml").dump(newFrontmatter, { lineWidth: 1000 }).trim()}\n---\n\n`;
                 try {
-                                const newFileContent = `${yamlString}${heading}\n${embedLink}\n\n## Connected notes\n\n### Backlinking Notes not mentioned above\n\n\`\`\`dataviewjs\nconst { DataviewUtilsUnmentionedInlinks } = customJS;\nawait DataviewUtilsUnmentionedInlinks.prettyUnmentionedInlinks(dv);\n\`\`\``;
+                                const newFileContent = `${yamlString}${heading}\n${embedLink}\n\n## Connected notes`;
                   await plugin.app.vault.create(newFilePath, newFileContent);
                   const newLeaf = plugin.app.workspace.getLeaf("split");
                   const newFileHandle = plugin.app.vault.getAbstractFileByPath(newFilePath);
