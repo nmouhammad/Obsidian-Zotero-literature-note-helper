@@ -1,7 +1,7 @@
 {
   "id": "block-embed-helper",
   "name": "Academic note-taking helper",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "minAppVersion": "0.12.0",
   "description": "Create point notes based on a selected bullet point and move selected bullet points to a point note opened on the right side. Additionally, select topics more easily",
   "author": "Nina Mouhammad",
