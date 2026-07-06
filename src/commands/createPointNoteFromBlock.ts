@@ -111,7 +111,7 @@ export function registerPointNoteFromBlock(plugin: Plugin) {
                 // Compose note content
                 const yamlString = `---\n${require("js-yaml").dump(newFrontmatter, { lineWidth: 1000 }).trim()}\n---\n\n`;
                 try {
-                                const newFileContent = `${yamlString}${heading}\n${embedLink}\n\n## Connected notes`;
+                                const newFileContent = `${yamlString}${heading}\n${embedLink}`;
                   await plugin.app.vault.create(newFilePath, newFileContent);
                   const newLeaf = plugin.app.workspace.getLeaf("split");
                   const newFileHandle = plugin.app.vault.getAbstractFileByPath(newFilePath);
