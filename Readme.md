@@ -14,7 +14,7 @@ This plugin provides three helper commands for working with literature notes in 
 
 - "Manage Topics"
 	- Description: Opens a multi-select modal of available Topic notes (files whose basename ends with ` - Topic`) and lets you add or remove topic links in the active note. It pre-selects topics already present in the note.
-	- Effect: Adds links to the chosen topic notes after `Topics*:: ` in the active note
+	- Effect: Adds links to the chosen topic notes in the `Topics` property of the active note
 
 ## Features
 
